@@ -1,4 +1,3 @@
 # Data-Driven Neural Network Hyperparameter Tuning
 
-## Status
-Work in Progress
+Status: work in progress
