@@ -1,18 +1,19 @@
 """
 Representing and performing arithmetic on 2d polynomials.
 
-We store a 2d polynomial
+We store 2d polynomials
     p(alpha, w) = sum_{i,j} c[i,j] * alpha^i * w^j
-as a 2d numpy array of coefficients, where c[i,j] is the
+as 2d numpy arrays of coefficients, where c[i,j] is the
 coefficient of alpha^i * w^j.
 
-Shape: c has shape (deg_alpha + 1, deg_w + 1).
+Shape of c: (deg_alpha + 1, deg_w + 1).
 """
 
 import numpy as np
 
 
 def eval_poly2d(coeff, alpha, w):
+    """Evaluates 2d polynomial at (alpha, w)."""
     result = 0.0
     for i in range(coeff.shape[0]):
         for j in range(coeff.shape[1]):
@@ -22,13 +23,17 @@ def eval_poly2d(coeff, alpha, w):
 
 
 def eval_poly2d_grid(coeff, alpha_arr, w_arr):
+    """Evaluates on a grid of (alpha, w) values."""
     alpha_powers = np.array([alpha_arr**i for i in range(coeff.shape[0])])
     w_powers = np.array([w_arr**j for j in range(coeff.shape[1])])
-    # result[a, w] = sum_ij c[i,j] * alpha^i * w^j = alpha_powers^T @ coeff @ w_powers
+    # res[x, y] = \sum_{i,j} c[i, j] alpha_x^i w_y^j
+    # = \sum_j ((alpha_powers^T) @ coeff)[x, j] * w_powers[j, y]
+    # = alpha_powers^T @ (coeff @ w_powers)
     return alpha_powers.T @ coeff @ w_powers
 
 
 def partial_w(coeff):
+    """Computes partial wrt w."""
     if coeff.shape[1] <= 1:
         return np.zeros((coeff.shape[0], 1))
     new = np.zeros((coeff.shape[0], coeff.shape[1] - 1))
@@ -37,17 +42,18 @@ def partial_w(coeff):
     return new
 
 
+def partial_ww(coeff):
+    return partial_w(partial_w(coeff))
+
+
 def partial_alpha(coeff):
+    """Partial wrt alpha."""
     if coeff.shape[0] <= 1:
         return np.zeros((1, coeff.shape[1]))
     new = np.zeros((coeff.shape[0] - 1, coeff.shape[1]))
     for i in range(1, coeff.shape[0]):
         new[i - 1, :] = i * coeff[i, :]
     return new
-
-
-def partial_ww(coeff):
-    return partial_w(partial_w(coeff))
 
 
 def partial_alpha_w(coeff):
